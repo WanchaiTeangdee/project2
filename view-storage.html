@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ดู localStorage - U-Nai Dee</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth.js"></script>
+    <script>
+        // Check if user is Admin before page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            const user = auth.getLoggedInUser()
+            if (!user) {
+                alert('❌ กรุณา Login ก่อนเข้าถึงหน้านี้')
+                window.location.href = 'login.html'
+                return
+            }
+            
+            if (user.role !== 'admin') {
+                alert('❌ เฉพาะ Admin เท่านั้นที่สามารถเข้าถึงหน้านี้ได้')
+                window.location.href = 'index.html'
+                return
+            }
+        })
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .storage-viewer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+        
+        .page-header h2 {
+            font-size: 42px;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.95;
+            margin: 0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+        }
+        
+        .stat-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+        
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .stat-card .number {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-card .label {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+        
+        .storage-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.6s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .storage-section:hover {
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+        }
+        
+        .storage-section h3 {
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .storage-section h3::before {
+            content: attr(data-icon);
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        pre {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.8;
+            border: 2px solid #e5e7eb;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+            max-height: 400px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+        
+        .empty-state {
+            color: #9ca3af;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+        
+        .empty-state::before {
+            content: "📭";
+            display: block;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            font-size: 32px;
+        }
+        
+        .warning-box p {
+            margin: 0;
+            color: #92400e;
+            font-weight: 600;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header h2 {
+                font-size: 32px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .storage-section {
+                padding: 20px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .json-key {
+            color: #059669;
+            font-weight: 600;
+        }
+        
+        .json-string {
+            color: #dc2626;
+        }
+        
+        .json-number {
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body class="site-bg">
+    <header class="site-header">
+        <div class="container">
+            <h1 class="brand">U-Nai Dee - Storage Viewer</h1>
+            <nav>
+                <a href="index.html">กลับหน้าหลัก</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="storage-viewer">
+        <div class="page-header">
+            <h2>📊 localStorage Manager</h2>
+            <p>จัดการข้อมูลที่เก็บในเบราว์เซอร์ของคุณ</p>
+        </div>
+        
+        <div class="stats" id="stats">
+            <!-- Stats will be inserted here -->
+        </div>
+
+        <div class="storage-section">
+            <h3 data-icon="👤">ผู้ใช้ที่ Login อยู่</h3>
+            <pre id="current-user"></pre>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
+                <button class="btn btn-secondary" onclick="viewProfile()">👁️ ดูโปรไฟล์</button>
+            </div>
+        </div>
+
+        <div class="storage-section">
+            <h3 data-icon="👥">สมาชิกทั้งหมด</h3>
+            <pre id="all-users"></pre>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="clearUsers()">🗑️ ลบผู้ใช้ทั้งหมด</button>
+                <button class="btn btn-success" onclick="addDemoUser()">➕ เพิ่มผู้ใช้ตัวอย่าง</button>
+            </div>
+        </div>
+
+        <div class="storage-section">
+            <h3 data-icon="📋">การจองทั้งหมด</h3>
+            <pre id="bookings"></pre>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="exportBookings()">💾 Export JSON</button>
+                <button class="btn btn-success" onclick="exportCSV()">📊 Export CSV</button>
+                <button class="btn btn-danger" onclick="clearBookings()">🗑️ ลบการจองทั้งหมด</button>
+            </div>
+        </div>
+
+        <div class="storage-section">
+            <h3 data-icon="🗑️">ลบข้อมูลทั้งหมด</h3>
+            <div class="warning-box">
+                <p>คำเตือน: การกระทำนี้จะลบข้อมูลทั้งหมดและไม่สามารถกู้คืนได้</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="clearAll()">🔥 ลบทุกอย่าง (Clear All)</button>
+                <button class="btn btn-primary" onclick="location.reload()">🔄 รีเฟรช</button>
+                <button class="btn btn-secondary" onclick="backupAll()">💾 Backup ทั้งหมด</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function formatJSON(key) {
+            const data = localStorage.getItem(key)
+            if (!data) return '<div class="empty-state">ไม่มีข้อมูล</div>'
+            try {
+                const parsed = JSON.parse(data)
+                let formatted = JSON.stringify(parsed, null, 2)
+                // Syntax highlighting
+                formatted = formatted
+                    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+                    .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+                    .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+                return formatted
+            } catch {
+                return data
+            }
+        }
+
+        function loadData() {
+            // Current user
+            document.getElementById('current-user').innerHTML = formatJSON('unai_user')
+            
+            // All users
+            document.getElementById('all-users').innerHTML = formatJSON('unai_users')
+            
+            // Bookings
+            document.getElementById('bookings').innerHTML = formatJSON('unai_bookings_v1')
+
+            // Stats
+            const user = JSON.parse(localStorage.getItem('unai_user') || 'null')
+            const users = JSON.parse(localStorage.getItem('unai_users') || '[]')
+            const bookings = JSON.parse(localStorage.getItem('unai_bookings_v1') || '[]')
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="icon">${user ? '✅' : '❌'}</div>
+                    <h4>สถานะ Login</h4>
+                    <div class="number">${user ? user.username || 'ไม่ระบุ' : 'ไม่ได้ Login'}</div>
+                    <div class="label">${user ? 'ผู้ใช้งานปัจจุบัน' : 'กรุณาเข้าสู่ระบบ'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">👥</div>
+                    <h4>สมาชิก</h4>
+                    <div class="number">${users.length}</div>
+                    <div class="label">ผู้ใช้ที่ลงทะเบียน</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">📋</div>
+                    <h4>การจอง</h4>
+                    <div class="number">${bookings.length}</div>
+                    <div class="label">รายการจองทั้งหมด</div>
+                </div>
+            `
+        }
+
+        function logout() {
+            if (confirm('ต้องการออกจากระบบ?')) {
+                localStorage.removeItem('unai_user')
+                location.reload()
+            }
+        }
+
+        function clearUsers() {
+            if (confirm('ต้องการลบข้อมูลผู้ใช้ทั้งหมด?')) {
+                localStorage.removeItem('unai_users')
+                localStorage.removeItem('unai_user')
+                location.reload()
+            }
+        }
+
+        function clearBookings() {
+            if (confirm('ต้องการลบการจองทั้งหมด?')) {
+                localStorage.removeItem('unai_bookings_v1')
+                location.reload()
+            }
+        }
+
+        function clearAll() {
+            if (confirm('⚠️ แน่ใจหรือไม่? จะลบข้อมูลทั้งหมด!')) {
+                localStorage.clear()
+                alert('ลบข้อมูลทั้งหมดแล้ว')
+                location.reload()
+            }
+        }
+
+        function exportBookings() {
+            const bookings = localStorage.getItem('unai_bookings_v1')
+            if (!bookings) {
+                alert('ไม่มีข้อมูลการจอง')
+                return
+            }
+            
+            const blob = new Blob([bookings], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `bookings_${new Date().toISOString().split('T')[0]}.json`
+            a.click()
+            URL.revokeObjectURL(url)
+            
+            alert('✅ Export JSON สำเร็จ!')
+        }
+
+        function exportCSV() {
+            const bookings = JSON.parse(localStorage.getItem('unai_bookings_v1') || '[]')
+            if (bookings.length === 0) {
+                alert('ไม่มีข้อมูลการจอง')
+                return
+            }
+            
+            // Create CSV
+            let csv = 'ID,Listing ID,Name,Email,Period,Duration,Total,Created At\n'
+            bookings.forEach(b => {
+                csv += `${b.id},${b.listingId},"${b.name}","${b.email}",${b.period},${b.duration},${b.total},${b.createdAt}\n`
+            })
+            
+            const blob = new Blob([csv], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `bookings_${new Date().toISOString().split('T')[0]}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+            
+            alert('✅ Export CSV สำเร็จ!')
+        }
+
+        function backupAll() {
+            const backup = {
+                user: localStorage.getItem('unai_user'),
+                users: localStorage.getItem('unai_users'),
+                bookings: localStorage.getItem('unai_bookings_v1'),
+                timestamp: new Date().toISOString()
+            }
+            
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `backup_${new Date().toISOString().split('T')[0]}.json`
+            a.click()
+            URL.revokeObjectURL(url)
+            
+            alert('✅ Backup ทั้งหมดสำเร็จ!')
+        }
+
+        function viewProfile() {
+            const user = JSON.parse(localStorage.getItem('unai_user') || 'null')
+            if (!user) {
+                alert('ไม่มีผู้ใช้ที่ Login อยู่')
+                return
+            }
+            alert(`👤 โปรไฟล์\n\nUsername: ${user.username}\nEmail: ${user.email || 'ไม่ระบุ'}`)
+        }
+
+        function addDemoUser() {
+            const users = JSON.parse(localStorage.getItem('unai_users') || '[]')
+            const demoUser = {
+                username: 'demo_' + Date.now(),
+                email: 'demo@example.com',
+                password: 'hashed_password_demo',
+                createdAt: new Date().toISOString()
+            }
+            users.push(demoUser)
+            localStorage.setItem('unai_users', JSON.stringify(users))
+            loadData()
+            alert('✅ เพิ่มผู้ใช้ตัวอย่างแล้ว!')
+        }
+
+        // Load on page load
+        loadData()
+
+        // Auto refresh every 2 seconds
+        setInterval(loadData, 2000)
+    </script>
+</body>
+</html>

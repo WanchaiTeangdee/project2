@@ -1,0 +1,116 @@
+:root{
+    --bg: #f4f6fb;
+    --surface: #ffffff;
+    --accent: #2563eb; /* blue-600 */
+    --muted: #6b7280;
+    --soft: #eef2f7;
+    --radius: 12px;
+    --shadow: 0 8px 24px rgba(16,24,40,0.08);
+    --glass: rgba(255,255,255,0.6);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+.site-bg{
+    /* prefer local BG.jpg if present, otherwise fallback to Unsplash */
+    background-image: linear-gradient(rgba(244,246,251,0.65), rgba(255,255,255,0.65)), url('BG.jpg'), linear-gradient(rgba(244,246,251,0.65), rgba(255,255,255,0.65)), url('https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=1600&q=60');
+    background-size: cover, cover;
+    background-position: center center, center center;
+    background-attachment: fixed, fixed;
+}
+body{font-family:Inter, 'Segoe UI', Roboto, Arial, sans-serif;margin:0;color:#0f172a;line-height:1.45}
+.container{max-width:1100px;margin:0 auto;padding:28px;backdrop-filter: blur(6px);background:rgba(255,255,255,0.6);border-radius:14px}
+
+.site-header{background:transparent;padding:12px 0}
+.site-header .container{display:flex;align-items:center;justify-content:space-between}
+.brand{margin:0;font-size:1.25rem;color:var(--accent);font-weight:700}
+nav a{margin-left:18px;color:var(--muted);text-decoration:none;font-weight:600}
+
+.search{margin:18px 0;padding:18px;background:linear-gradient(90deg,var(--surface),#fbfdff);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(15,23,42,0.04)}
+.search-row{display:flex;gap:12px;align-items:center}
+.search-row input[type=text]{flex:1;padding:12px 14px;border:1px solid #e6eefc;border-radius:10px;background:transparent}
+.search-row select{padding:10px;border-radius:10px;border:1px solid #e6eefc;background:transparent}
+.search-row button{background:var(--accent);color:#fff;padding:10px 16px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+.search-row button:hover{filter:brightness(0.95)}
+
+.listings h2{margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.9), rgba(255,255,255,0.95));border-radius:12px;padding:0;border:1px solid rgba(15,23,42,0.06);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 6px 18px rgba(15,23,42,0.06);transition:transform .18s ease, box-shadow .18s ease}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(15,23,42,0.08)}
+.card img{width:100%;height:180px;object-fit:cover}
+.card .card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+.card h3{margin:0 0 6px 0;font-size:1.05rem;color:#0b1220}
+.card p{margin:6px 0;color:var(--muted);font-size:0.95rem}
+.card .meta{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.price{font-weight:700;color:#0b1220}
+.tag{font-size:0.85rem;padding:6px 8px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:700}
+
+.btn{background:#f1f5f9;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;transition:all 0.2s ease;font-weight:500}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.secondary{background:#059669;color:#fff}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.btn:active{transform:translateY(0)}
+
+.about{margin:28px 0;padding:18px;background:linear-gradient(180deg,var(--surface),#ffffff);border-radius:12px;border:1px solid rgba(15,23,42,0.04);box-shadow:var(--shadow)}
+
+.site-footer{margin-top:28px;padding:20px 0;color:var(--muted);text-align:center;font-size:0.95rem}
+
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);z-index:60}
+.modal[aria-hidden="false"]{display:flex}
+.modal-content{background:linear-gradient(180deg,#ffffff, #fbfdff);padding:18px;border-radius:14px;max-width:640px;width:96%;box-shadow:0 24px 60px rgba(2,6,23,0.4);position:relative;transform:translateY(8px);transition:transform .18s ease}
+.modal[aria-hidden="false"] .modal-content{transform:none}
+.modal-close{position:absolute;right:12px;top:8px;border:0;background:transparent;font-size:20px;cursor:pointer}
+.modal form{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.modal label{display:flex;flex-direction:column;font-size:0.95rem;color:#0b1220}
+.modal input,.modal select{padding:10px;border-radius:8px;border:1px solid #e6eefc}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end}
+
+/* small screens */
+@media (max-width:720px){
+    .container{padding:16px}
+    .search-row{flex-direction:column;align-items:stretch}
+    .card img{height:180px}
+}
+
+/* Auth / forms */
+.auth-wrap{max-width:520px;margin:44px auto;padding:22px;background:linear-gradient(180deg,var(--surface),#fbfdff);border-radius:14px;box-shadow:0 12px 40px rgba(2,6,23,0.06)}
+.auth-wrap h2{margin:0 0 10px;font-size:1.25rem;color:#0b1220}
+.auth-wrap label{display:block;margin-bottom:10px;color:#0b1220}
+.auth-wrap input, .auth-wrap select{width:100%;padding:12px;border-radius:10px;border:1px solid #e6eefc;margin-top:6px}
+.auth-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+.auth-note{margin-top:10px;color:var(--muted);font-size:0.95rem}
+.msg{margin-top:8px;color:crimson}
+.msg.success{color:green}
+
+.links-inline{font-size:0.95rem}
+.links-inline a{color:var(--accent);text-decoration:none;margin-right:8px}
+
+/* Auth header / branding */
+.auth-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;letter-spacing:0.6px}
+.auth-sub{color:var(--muted);font-size:0.95rem}
+
+/* password field with toggle */
+.password-field{position:relative}
+.password-field input{padding-right:44px}
+.toggle-pw{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px}
+.toggle-pw:hover{background:rgba(15,23,42,0.04)}
+
+/* token display */
+.token-box{display:flex;gap:8px;align-items:center;margin-top:8px}
+.token-box input{flex:1}
+.token-copy{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+
+/* small animations */
+.fade-in{animation:fadeIn .28s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Map section */
+.map-section{margin:18px 0}
+.map-section h2{margin:0 0 6px}
+.leaflet-container{border-radius:12px;height:360px}
+@media (max-width:720px){
+    .leaflet-container{height:260px}
+}
+
+

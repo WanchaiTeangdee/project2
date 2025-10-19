@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "title": "Condo ใกล้เขาใหญ่",
+    "location": "เขาใหญ่",
+    "type": "condo",
+    "maxGuests": 4,
+    "priceMonth": 15000,
+    "priceYear": 150000,
+    "lat": 14.4390,
+    "lon": 101.3723,
+    "image": "https://picsum.photos/seed/kaoyai/800/600",
+    "description": "คอนโดชั้นสูง วิวภูเขา เหมาะสำหรับการเช่าระยะยาว",
+    "owner": {
+      "name": "คุณสมชาย",
+      "phone": "081-234-5678",
+      "line": "@kaoyaicondo"
+    }
+  },
+  {
+    "id": "2",
+    "title": "บ้านพักริมน้ำ (เช่าเดือน/ปี)",
+    "location": "เชียงใหม่",
+    "type": "house",
+    "maxGuests": 6,
+    "priceMonth": 20000,
+    "priceYear": 200000,
+    "lat": 18.7883,
+    "lon": 98.9853,
+    "image": "https://picsum.photos/seed/chiangmai/800/600",
+    "description": "บ้านพักพร้อมสวนและที่จอดรถ เหมาะสำหรับครอบครัวที่ต้องการเช่าระยะยาว",
+    "owner": {
+      "name": "คุณวิไล",
+      "phone": "089-765-4321",
+      "line": "@chiangmaihouse"
+    }
+  },
+  {
+    "id": "3",
+    "title": "Condo ใจกลางเมือง",
+    "location": "กรุงเทพฯ",
+    "type": "condo",
+    "maxGuests": 2,
+    "priceMonth": 12000,
+    "priceYear": 120000,
+    "lat": 13.736717,
+    "lon": 100.523186,
+    "image": "https://picsum.photos/seed/bkk/800/600",
+    "description": "คอนโดสะดวกสบาย ใกล้รถไฟฟ้า เหมาะสำหรับคนทำงานที่ต้องการเช่าระยะยาว",
+    "owner": {
+      "name": "คุณประเสริฐ",
+      "phone": "092-111-2233",
+      "line": "@bkkcondo"
+    }
+  }
+]

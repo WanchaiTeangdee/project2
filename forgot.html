@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ลืมรหัสผ่าน - U-Nai Dee</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="site-bg">
+  <div class="container">
+    <div class="auth-wrap">
+      <h2>รีเซ็ตรหัสผ่าน</h2>
+      <div class="auth-header">
+        <div class="logo">U-Nai Dee</div>
+        <div>
+          <div class="auth-sub">หากลืมรหัสผ่าน คุณสามารถขอโทเค็นรีเซ็ตได้ที่นี่ (จำลอง)</div>
+        </div>
+      </div>
+      <form id="request-form" class="fade-in">
+        <label>อีเมลที่ลงทะเบียน
+          <input name="email" type="email" required placeholder="you@example.com">
+        </label>
+        <div class="auth-actions">
+          <a href="login.html" class="btn">ยกเลิก</a>
+          <button class="btn primary" type="submit">ขอรหัสรีเซ็ต</button>
+        </div>
+      </form>
+      <div id="request-msg" class="msg"></div>
+
+      <hr>
+
+      <h3 style="margin-top:14px">ใช้โทเค็นรีเซ็ต (ถ้ามีแล้ว)</h3>
+      <form id="reset-form" class="fade-in">
+        <label>อีเมล
+          <input name="email" type="email" required>
+        </label>
+        <label>โทเค็น
+          <div class="token-box">
+            <input name="token" required>
+            <button type="button" class="token-copy">คัดลอก</button>
+          </div>
+        </label>
+        <label class="password-field">รหัสผ่านใหม่
+          <input name="newpassword" type="password" required>
+          <button type="button" class="toggle-pw">แสดง</button>
+        </label>
+        <div class="auth-actions">
+          <a href="login.html" class="btn">ยกเลิก</a>
+          <button class="btn primary" type="submit">รีเซ็ต</button>
+        </div>
+      </form>
+      <div id="reset-msg" class="msg"></div>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script src="auth-ui.js"></script>
+  <script>
+    const req = document.getElementById('request-form')
+    const reqMsg = document.getElementById('request-msg')
+    req.addEventListener('submit', e=>{
+      e.preventDefault(); reqMsg.textContent=''
+      const fd = new FormData(req)
+      try{
+        const token = auth.requestPasswordReset(fd.get('email'))
+        reqMsg.style.color='green'
+        reqMsg.textContent = 'โทเค็นรีเซ็ต (จำลอง): ' + token + ' — คัดลอกและนำไปวางในฟอร์มด้านล่าง'
+      }catch(err){ reqMsg.style.color='crimson'; reqMsg.textContent = err.message }
+    })
+
+    const reset = document.getElementById('reset-form')
+    const resetMsg = document.getElementById('reset-msg')
+    reset.addEventListener('submit', async e=>{
+      e.preventDefault(); resetMsg.textContent=''
+      const fd = new FormData(reset)
+      try{
+        await auth.resetPassword(fd.get('email'), fd.get('token'), fd.get('newpassword'))
+        resetMsg.style.color='green'; resetMsg.textContent='รีเซ็ตรหัสผ่านเรียบร้อยแล้ว'
+      }catch(err){ resetMsg.style.color='crimson'; resetMsg.textContent = err.message }
+    })
+  </script>
+</body>
+</html>

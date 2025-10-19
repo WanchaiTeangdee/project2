@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Signup - U-Nai Dee</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="site-bg">
+  <div class="container">
+    <div class="auth-wrap">
+      <h2>สมัครสมาชิก</h2>
+      <div class="auth-header">
+        <div class="logo">U-Nai Dee</div>
+        <div>
+          <div class="auth-sub">สร้างบัญชีเพื่อจัดการการจองของคุณ</div>
+        </div>
+      </div>
+      <form id="signup-form" class="fade-in">
+        <label>ชื่อผู้ใช้
+          <input name="username" required placeholder="ชื่อผู้ใช้">
+        </label>
+        <label>อีเมล
+          <input name="email" type="email" required placeholder="you@example.com">
+        </label>
+        <label class="password-field">รหัสผ่าน
+          <input name="password" type="password" required placeholder="รหัสผ่าน">
+          <button type="button" class="toggle-pw">แสดง</button>
+        </label>
+        <div style="background:#f3f4f6;padding:12px;border-radius:8px;margin-bottom:12px">
+          <small style="color:#6b7280">
+            � หมายเหตุ: สมาชิกใหม่จะได้รับบทบาท "ลูกค้า" โดยอัตโนมัติ<br>
+            หากต้องการเป็น "ผู้ปล่อยเช่า" หรือ "Admin" กรุณาติดต่อผู้ดูแลระบบ
+          </small>
+        </div>
+        <div class="auth-actions">
+          <a href="login.html" class="btn">ย้อนกลับ</a>
+          <button class="btn primary" type="submit">สมัครสมาชิก</button>
+        </div>
+      </form>
+      <div id="signup-msg" class="msg"></div>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script src="auth-ui.js"></script>
+  <script>
+    const form = document.getElementById('signup-form')
+    const msg = document.getElementById('signup-msg')
+    form.addEventListener('submit', async e=>{
+      e.preventDefault(); msg.textContent = ''
+      const fd = new FormData(form)
+      try{
+        const result = await auth.createUser({
+          username: fd.get('username'),
+          email: fd.get('email'),
+          password: fd.get('password')
+          // role will be 'customer' by default
+        })
+        msg.style.color='green'
+        msg.textContent=`สมัครสมาชิกเรียบร้อยแล้ว (บทบาท: ลูกค้า) สามารถเข้าสู่ระบบได้`
+        setTimeout(() => window.location.href = 'login.html', 1500)
+      }catch(err){ msg.style.color='crimson'; msg.textContent=err.message }
+    })
+  </script>
+</body>
+</html>

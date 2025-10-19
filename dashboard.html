@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | U-Nai Dee</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        .dashboard-header h1 {
+            font-size: 42px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .role-badge i { color: #ffffff; }
+        .role-badge:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.45); }
+        .role-badge:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.35), 0 6px 16px rgba(37,99,235,0.45); }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dashboard-section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .dashboard-section h2 {
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        table tr:hover {
+            background: #f9fafb;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-edit {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-view {
+            background: #059669;
+            color: white;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+        }
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .modal-btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .modal-btn-secondary:hover {
+            background: #d1d5db;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #f0f4f8 0%, #e5e7eb 100%);min-height:100vh">
+    <header class="site-header" style="background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+        <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px">
+            <h1 class="brand" style="color:#3b82f6;font-size:20px;margin:0"><i class="fas fa-building"></i> U-Nai Dee</h1>
+            <nav style="display:flex;gap:15px">
+                <a href="index.html" ><i class="fas fa-city"></i> คอนโด</a>
+                <a href="house.html" ><i class="fas fa-home"></i> บ้าน</a>
+            </nav>
+            <div class="user-area" id="user-area" style="display:flex;align-items:center;gap:10px">            
+                <div class="role-badge" id="role-badge-nav">Loading...</div>
+                <a href="dashboard.html" class="btn" style="background:#059669;color:#2563eb">📊 Dashboard</a>
+                <button onclick="auth.logoutUser(); window.location.href='index.html'" class="btn" style="background:transparent;color:#6b7280;padding:8px 16px;border:none;cursor:pointer;font-weight:500">ออกจากระบบ</button>
+            </div>
+            
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="dashboard-header" style="text-align:center;margin-bottom:30px">
+            <h1 style="color:#1f2937;font-size:36px;margin:0"><i class="fas fa-chart-line"></i> Dashboard</h1>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+            <!-- Stats will be inserted here -->
+        </div>
+        
+        <!-- Owner: Add New Listing -->
+        <div id="owner-add-listing" style="display:none;margin-bottom:20px">
+            <div class="dashboard-section">
+                <h2><i class="fas fa-plus-circle"></i> เพิ่มประกาศให้เช่า</h2>
+                <button class="btn" onclick="openAddListingModal()" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:white;padding:12px 30px;border-radius:8px;font-weight:600;width:100%;max-width:300px">
+                    <i class="fas fa-home"></i> เพิ่มที่พักใหม่
+                </button>
+            </div>
+        </div>
+        
+        <!-- Admin: Quick Access to Storage Viewer -->
+        <div id="admin-storage-link" style="display:none;text-align:center;margin-bottom:20px">
+            <a href="view-storage.html" class="btn" style="background:linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);color:white;padding:12px 30px;text-decoration:none;border-radius:8px;display:inline-block;font-weight:600">
+                <i class="fas fa-database"></i> ดูข้อมูล localStorage
+            </a>
+        </div>
+
+        <!-- Admin: All listings -->
+        <div class="dashboard-section" id="admin-listings" style="display:none">
+            <h2><i class="fas fa-building"></i> ที่พักทั้งหมดในระบบ</h2>
+            <div class="table-container">
+                <table id="listings-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ชื่อ</th>
+                            <th>ประเภท</th>
+                            <th>สถานที่</th>
+                            <th>ราคา/เดือน</th>
+                            <th>เจ้าของ</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listings-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin/Owner: Bookings -->
+        <div class="dashboard-section" id="bookings-section" style="display:none">
+            <h2><i class="fas fa-clipboard-list"></i> การจองทั้งหมด</h2>
+            <div class="table-container">
+                <table id="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ที่พัก</th>
+                            <th>ผู้จอง</th>
+                            <th>อีเมล</th>
+                            <th>ระยะเวลา</th>
+                            <th>ราคารวม</th>
+                            <th>วันที่จอง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin: All users -->
+        <div class="dashboard-section" id="admin-users" style="display:none">
+            <h2><i class="fas fa-users"></i> ผู้ใช้ทั้งหมด</h2>
+            <div class="table-container">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>บทบาท</th>
+                            <th>สร้างเมื่อ</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin: Owner Requests -->
+        <div class="dashboard-section" id="admin-owner-requests" style="display:none">
+            <h2>📨 คำขอเป็นผู้ปล่อยเช่า</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>เวลาที่ขอ</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="owner-requests-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin: User Reports/Contact -->
+        <div class="dashboard-section" id="admin-reports" style="display:none">
+            <h2>📢 ข้อความแจ้งปัญหา/สอบถามจากผู้ใช้</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>ข้อความ</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Role Change Modal -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                ✏️ เปลี่ยนบทบาทผู้ใช้
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>👤 ชื่อผู้ใช้</label>
+                    <input type="text" id="modalUsername" readonly style="width:100%;padding:12px 15px;border:2px solid #e5e7eb;border-radius:8px;background:#f9fafb;color:#6b7280">
+                </div>
+                <div class="form-group">
+                    <label>🎭 บทบาทปัจจุบัน</label>
+                    <input type="text" id="modalCurrentRole" readonly style="width:100%;padding:12px 15px;border:2px solid #e5e7eb;border-radius:8px;background:#f9fafb;color:#6b7280">
+                </div>
+                <div class="form-group">
+                    <label>🔄 เลือกบทบาทใหม่</label>
+                    <select id="modalNewRole">
+                        <option value="">-- เลือกบทบาท --</option>
+                        <option value="customer">👤 ลูกค้า (Customer)</option>
+                        <option value="owner">🏠 ผู้ปล่อยเช่า (Owner)</option>
+                        <option value="admin">⚙️ Admin (ผู้ดูแลระบบ)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeRoleModal()">ยกเลิก</button>
+                <button class="modal-btn modal-btn-primary" onclick="submitRoleChange()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                ✏️ แก้ไขข้อมูลผู้ใช้
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>👤 ชื่อผู้ใช้</label>
+                    <input type="text" id="editModalUsername" readonly style="width:100%;padding:12px 15px;border:2px solid #e5e7eb;border-radius:8px;background:#f9fafb;color:#6b7280">
+                    <small style="color:#6b7280;font-size:12px">* ไม่สามารถเปลี่ยนชื่อผู้ใช้ได้</small>
+                </div>
+                <div class="form-group">
+                    <label>📧 อีเมล</label>
+                    <input type="email" id="editModalEmail" required style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                </div>
+                <div class="form-group">
+                    <label>🎭 บทบาท</label>
+                    <select id="editModalRole" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                        <option value="customer">👤 ลูกค้า (Customer)</option>
+                        <option value="owner">🏠 ผู้ปล่อยเช่า (Owner)</option>
+                        <option value="admin">⚙️ Admin (ผู้ดูแลระบบ)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🔑 รหัสผ่านใหม่</label>
+                    <input type="password" id="editModalPassword" placeholder="ไม่ต้องกรอกหากไม่ต้องการเปลี่ยน" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                    <small style="color:#6b7280;font-size:12px">* เว้นว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน</small>
+                </div>
+                <div class="form-group">
+                    <label>🔑 ยืนยันรหัสผ่านใหม่</label>
+                    <input type="password" id="editModalConfirmPassword" placeholder="ยืนยันรหัสผ่านใหม่" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeEditUserModal()">ยกเลิก</button>
+                <button class="modal-btn modal-btn-primary" onclick="submitEditUser()">💾 บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Listing Modal -->
+    <div id="addListingModal" class="modal">
+        <div class="modal-content" style="max-width:700px;max-height:90vh;overflow-y:auto">
+            <div class="modal-header">
+                ➕ เพิ่มประกาศให้เช่า
+            </div>
+            <div class="modal-body">
+                <form id="addListingForm">
+                    <div class="form-group">
+                        <label>🏷️ ชื่อที่พัก *</label>
+                        <input type="text" id="listingName" required placeholder="เช่น: คอนโดหรู ใจกลางเมือง" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🏠 ประเภท *</label>
+                        <select id="listingType" required style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                            <option value="">-- เลือกประเภท --</option>
+                            <option value="condo">🏢 Condo (คอนโด)</option>
+                            <option value="house">🏡 House (บ้านพัก)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📍 สถานที่ *</label>
+                        <input type="text" id="listingLocation" required placeholder="เช่น: สุขุมวิท, กรุงเทพ" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>💰 ราคา/เดือน (บาท) *</label>
+                        <input type="number" id="listingPrice" required placeholder="เช่น: 15000" min="0" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🖼️ URL รูปภาพ *</label>
+                        <input type="url" id="listingImage" required placeholder="https://example.com/image.jpg" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        <small style="color:#6b7280;font-size:12px">* ใส่ลิงก์รูปภาพจากอินเทอร์เน็ต</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📝 รายละเอียด *</label>
+                        <textarea id="listingDescription" required placeholder="บรรยายรายละเอียดที่พัก..." rows="4" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px;resize:vertical"></textarea>
+                    </div>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                        <div class="form-group">
+                            <label>🛏️ ห้องนอน *</label>
+                            <input type="number" id="listingBedrooms" required min="0" value="1" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                        <div class="form-group">
+                            <label>🚿 ห้องน้ำ *</label>
+                            <input type="number" id="listingBathrooms" required min="0" value="1" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📏 ขนาด (ตร.ม.) *</label>
+                        <input type="number" id="listingSize" required min="0" placeholder="เช่น: 45" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                    </div>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                        <div class="form-group">
+                            <label>🗺️ ละติจูด (Latitude) *</label>
+                            <input type="number" id="listingLat" required step="any" placeholder="13.7563" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                        <div class="form-group">
+                            <label>🗺️ ลองจิจูด (Longitude) *</label>
+                            <input type="number" id="listingLng" required step="any" placeholder="100.5018" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                    </div>
+                    <small style="color:#6b7280;font-size:12px;display:block;margin-top:-10px">
+                        💡 หาพิกัดได้ที่ <a href="https://www.google.com/maps" target="_blank" style="color:#3b82f6">Google Maps</a> (คลิกขวาที่แผนที่ → คัดลอกพิกัด)
+                    </small>
+                    
+                    <div class="form-group">
+                        <label>✨ สิ่งอำนวยความสะดวก</label>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="Wi-Fi"> Wi-Fi
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="ที่จอดรถ"> ที่จอดรถ
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="สระว่ายน้ำ"> สระว่ายน้ำ
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="ฟิตเนส"> ฟิตเนส
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="แอร์"> แอร์
+                            </label>
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" class="listing-amenity" value="รปภ. 24 ชม."> รปภ. 24 ชม.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="background:#f0f9ff;padding:15px;border-radius:8px;border:2px solid #3b82f6;margin-top:20px">
+                        <h4 style="margin:0 0 10px 0;color:#1e40af">📞 ข้อมูลติดต่อ</h4>
+                        <div class="form-group">
+                            <label>👤 ชื่อผู้ติดต่อ *</label>
+                            <input type="text" id="ownerName" required placeholder="ชื่อของคุณ" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                        <div class="form-group">
+                            <label>📱 เบอร์โทร *</label>
+                            <input type="tel" id="ownerPhone" required placeholder="0812345678" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                        </div>
+                        <div class="form-group">
+                            <label>💬 LINE ID</label>
+                            <input type="text" id="ownerLine" placeholder="@yourline" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                            <small style="color:#6b7280;font-size:12px">* ไม่บังคับ</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeAddListingModal()">ยกเลิก</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="submitAddListing()">💾 บันทึกประกาศ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal for Dashboard -->
+    <div id="chat-modal-dashboard" class="modal" aria-hidden="true" style="z-index:9999;">
+        <div class="modal-content" style="max-width:420px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;">
+            <div class="modal-header" style="font-size:20px;font-weight:600;">💬 แชทกับลูกค้า
+                <button onclick="closeChatModalDashboard()" style="float:right;font-size:22px;background:none;border:none;cursor:pointer">×</button>
+            </div>
+            <div id="chat-messages-dashboard" style="flex:1 1 0;min-height:200px;max-height:350px;overflow-y:auto;padding:10px 0 10px 0;"></div>
+            <form id="chat-form-dashboard" style="display:flex;gap:8px;margin-top:10px;">
+                <input id="chat-input-dashboard" type="text" placeholder="พิมพ์ข้อความ..." autocomplete="off" style="flex:1 1 0;padding:10px 12px;border-radius:8px;border:1.5px solid #e5e7eb;">
+                <button type="submit" class="btn" style="background:#2563eb;color:white;">ส่ง</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Admin Reply to Report -->
+    <div id="reply-report-modal" class="modal" style="display:none;z-index:9999;">
+        <div class="modal-content" style="max-width:420px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;">
+            <div class="modal-header" style="font-size:20px;font-weight:600;">✉️ ตอบกลับผู้ใช้
+                <button onclick="closeReplyReportModal()" style="float:right;font-size:22px;background:none;border:none;cursor:pointer">×</button>
+            </div>
+            <div style="margin-bottom:10px;color:#374151;font-size:15px;">ข้อความที่แจ้ง:<br><span id="reply-report-message" style="display:block;margin-top:6px;background:#f3f4f6;padding:10px;border-radius:8px;"></span></div>
+            <textarea id="reply-report-reply" placeholder="พิมพ์ข้อความตอบกลับ..." rows="4" style="width:100%;padding:12px;border-radius:8px;border:1.5px solid #e5e7eb;"></textarea>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+                <button type="button" class="btn" onclick="closeReplyReportModal()" style="background:#6b7280;color:white">ยกเลิก</button>
+                <button type="button" class="btn" onclick="submitReplyReport()" style="background:#059669;color:white">ส่งข้อความ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal" style="display:none">
+        <div class="modal-content" style="max-width:500px">
+            <button class="modal-close" onclick="closeProfileModal()" aria-label="ปิด">×</button>
+            <h3 style="margin:0 0 20px 0;font-size:24px">👤 โปรไฟล์ของฉัน</h3>
+            <!-- View Mode -->
+            <div id="profile-view-mode">
+                <div style="background:#f9fafb;padding:20px;border-radius:12px;margin-bottom:20px">
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">ชื่อผู้ใช้</label>
+                        <input type="text" id="profile-username" readonly style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#1f2937">
+                    </div>
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">อีเมล</label>
+                        <input type="text" id="profile-email" readonly style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#1f2937">
+                    </div>
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">บทบาท</label>
+                        <input type="text" id="profile-role" readonly style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#1f2937">
+                    </div>
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">สมาชิกตั้งแต่</label>
+                        <input type="text" id="profile-created" readonly style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#1f2937">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button class="btn" onclick="showEditProfile()" style="background:#2563eb;color:white"><i class="fas fa-edit"></i> แก้ไขโปรไฟล์</button>
+                    <button class="btn" onclick="closeProfileModal()">ปิด</button>
+                </div>
+            </div>
+            <!-- Edit Mode -->
+            <div id="profile-edit-mode" style="display:none">
+                <form id="profile-edit-form">
+                    <div style="background:#f9fafb;padding:20px;border-radius:12px;margin-bottom:20px">
+                        <div style="margin-bottom:15px">
+                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">ชื่อผู้ใช้</label>
+                            <input type="text" id="edit-profile-username" readonly style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;background:#e5e7eb;color:#6b7280;cursor:not-allowed">
+                            <small style="color:#6b7280;font-size:12px">* ไม่สามารถเปลี่ยนชื่อผู้ใช้ได้</small>
+                        </div>
+                        <div style="margin-bottom:15px">
+                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">อีเมล</label>
+                            <input type="email" id="edit-profile-email" required style="width:100%;padding:10px 12px;border:1.5px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                        </div>
+                        <div style="margin-bottom:15px">
+                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">รหัสผ่านใหม่</label>
+                            <input type="password" id="edit-profile-password" placeholder="ไม่ต้องกรอกหากไม่ต้องการเปลี่ยน" style="width:100%;padding:10px 12px;border:1.5px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                        </div>
+                        <div>
+                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#374151;font-size:14px">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" id="edit-profile-confirm-password" placeholder="ยืนยันรหัสผ่านใหม่" style="width:100%;padding:10px 12px;border:1.5px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end">
+                        <button type="button" id="cancel-edit-profile-btn" class="btn" style="background:#6b7280;color:white;padding:10px 20px;border-radius:8px">ยกเลิก</button>
+                        <button type="submit" class="btn" style="background:#10b981;color:white;padding:10px 20px;border-radius:8px">💾 บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        const user = auth.getLoggedInUser()
+        
+        // Check permission
+        if(!user || (user.role !== 'admin' && user.role !== 'owner')) {
+            alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้')
+            window.location.href = 'index.html'
+        }
+
+        // Display role
+        const roleNames = {
+            admin: '<i class="fas fa-cog"></i> admin (Admin)',
+            owner: '<i class="fas fa-home"></i> owner (Owner)',
+            customer: '<i class="fas fa-user"></i> customer (Customer)'
+        }
+        const roleBadgeNav = document.getElementById('role-badge-nav')
+        if(roleBadgeNav) {
+            // Set label and content
+            roleBadgeNav.innerHTML = roleNames[user.role] || user.role
+            // Make it behave like a button
+            roleBadgeNav.setAttribute('role', 'button')
+            roleBadgeNav.setAttribute('tabindex', '0')
+            roleBadgeNav.setAttribute('aria-label', 'โปรไฟล์ของฉัน')
+            // Click opens profile
+            roleBadgeNav.addEventListener('click', openProfileModal)
+            // Keyboard accessibility (Enter/Space)
+            roleBadgeNav.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    openProfileModal()
+                }
+            })
+        }
+        
+        // Ensure text color is white for admin and owner
+        if(user.role === 'admin' || user.role === 'owner') {
+            roleBadgeNav.style.color = '#ffffff'
+        }
+
+        // Show storage link for admin only
+        if(user.role === 'admin') {
+            // --- Utility: escapeHtml (copied from app.js) ---
+            function escapeHtml(s){
+                return String(s).replace(/[&<>"']/g, ch=>({
+                    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'
+                }[ch]))
+            }
+            document.getElementById('admin-storage-link').style.display = 'block'
+        }
+
+        // Show add listing button for owner
+        if(user.role === 'owner') {
+            document.getElementById('owner-add-listing').style.display = 'block'
+        }
+
+        // Load data
+        const listings = JSON.parse(localStorage.getItem('unai_listings') || '[]')
+        const bookings = JSON.parse(localStorage.getItem('unai_bookings_v1') || '[]')
+        const users = auth.getUsers()
+
+        // Show stats
+        function renderStats() {
+            const statsGrid = document.getElementById('stats-grid')
+            
+            if(user.role === 'admin') {
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-building" style="font-size:40px;color:#3b82f6"></i></div>
+                        <div class="label">ที่พักทั้งหมด</div>
+                        <div class="value">${listings.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-clipboard-list" style="font-size:40px;color:#3b82f6"></i></div>
+                        <div class="label">การจองทั้งหมด</div>
+                        <div class="value">${bookings.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-users" style="font-size:40px;color:#3b82f6"></i></div>
+                        <div class="label">ผู้ใช้ทั้งหมด</div>
+                        <div class="value">${users.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-money-bill-wave" style="font-size:40px;color:#10b981"></i></div>
+                        <div class="label">รายได้รวม</div>
+                        <div class="value">${formatPrice(bookings.reduce((sum, b) => sum + (b.total || 0), 0))}</div>
+                    </div>
+                `
+            } else if(user.role === 'owner') {
+                const myListings = listings.filter(l => l.owner && l.owner.name === user.username)
+                const myBookings = bookings.filter(b => {
+                    const listing = listings.find(l => l.id === b.listingId)
+                    return listing && listing.owner && listing.owner.name === user.username
+                })
+                
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-building" style="font-size:40px;color:#3b82f6"></i></div>
+                        <div class="label">ที่พักของฉัน</div>
+                        <div class="value">${myListings.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-clipboard-list" style="font-size:40px;color:#3b82f6"></i></div>
+                        <div class="label">การจองทั้งหมด</div>
+                        <div class="value">${myBookings.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-money-bill-wave" style="font-size:40px;color:#10b981"></i></div>
+                        <div class="label">รายได้รวม</div>
+                        <div class="value">${formatPrice(myBookings.reduce((sum, b) => sum + (b.total || 0), 0))}</div>
+                    </div>
+                `
+            }
+        }
+
+        // Show sections based on role
+        if(user.role === 'admin') {
+            document.getElementById('admin-listings').style.display = 'block'
+            document.getElementById('bookings-section').style.display = 'block'
+            document.getElementById('admin-users').style.display = 'block'
+            document.getElementById('admin-owner-requests').style.display = 'block'
+            document.getElementById('admin-reports').style.display = 'block'
+            renderListingsTable()
+            renderBookingsTable(bookings)
+            renderUsersTable()
+            renderOwnerRequestsTable()
+            renderReportsTable()
+        // --- Admin: Render Reports Table ---
+        function renderReportsTable() {
+            const tbody = document.getElementById('reports-tbody');
+            const reports = JSON.parse(localStorage.getItem('unai_reports') || '[]');
+            if(reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon"><i class="fas fa-inbox" style="font-size:64px;color:#9ca3af"></i></div><div>ยังไม่มีข้อความแจ้งปัญหา/สอบถาม</div></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = reports.slice().reverse().map((r, i) => `
+                <tr>
+                    <td>${new Date(r.time).toLocaleString('th-TH')}</td>
+                    <td>${r.username || '-'}</td>
+                    <td>${r.email || '-'}</td>
+                    <td style="white-space:pre-line;max-width:260px;overflow-x:auto;">
+                        ${escapeHtml(r.message)}
+                        ${r.reply ? `<div style='margin-top:8px;color:#059669'><b>แอดมินตอบ:</b> ${escapeHtml(r.reply)}</div>` : ''}
+                    </td>
+                    <td>
+                        ${r.status === 'pending' ? '<span style="color:#f59e42;font-weight:600">รอดำเนินการ</span>' : r.status}
+                        ${!r.reply ? `<button class='btn-small btn-edit' onclick='openReplyReportModal(${reports.length-1 - i})'><i class="fas fa-reply"></i> ตอบกลับ</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Admin: Reply Modal for Reports ---
+        function openReplyReportModal(idx) {
+            window._replyReportIdx = idx;
+            const reports = JSON.parse(localStorage.getItem('unai_reports') || '[]');
+            const r = reports[idx];
+            document.getElementById('reply-report-message').textContent = r.message;
+            document.getElementById('reply-report-reply').value = '';
+            document.getElementById('reply-report-modal').style.display = 'flex';
+        }
+        function closeReplyReportModal() {
+            document.getElementById('reply-report-modal').style.display = 'none';
+        }
+        function submitReplyReport() {
+            const idx = window._replyReportIdx;
+            const reply = document.getElementById('reply-report-reply').value.trim();
+            if(!reply) { alert('กรุณากรอกข้อความตอบกลับ'); return; }
+            const reports = JSON.parse(localStorage.getItem('unai_reports') || '[]');
+            reports[idx].reply = reply;
+            reports[idx].status = 'replied';
+            localStorage.setItem('unai_reports', JSON.stringify(reports));
+            closeReplyReportModal();
+            renderReportsTable();
+        }
+
+        } else if(user.role === 'owner') {
+            document.getElementById('bookings-section').style.display = 'block'
+            const myBookings = bookings.filter(b => {
+                const listing = listings.find(l => l.id === b.listingId)
+                return listing && listing.owner && listing.owner.name === user.username
+            })
+            renderBookingsTable(myBookings)
+        }
+
+        function renderListingsTable() {
+            const tbody = document.getElementById('listings-tbody')
+            if(listings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีข้อมูลที่พัก</div></div></td></tr>'
+                return
+            }
+            
+            tbody.innerHTML = listings.map(l => `
+                <tr>
+                    <td>${l.id}</td>
+                    <td>${l.title}</td>
+                    <td>${l.type === 'condo' ? '🏢 คอนโด' : '🏠 บ้าน'}</td>
+                    <td>${l.location}</td>
+                    <td>${formatPrice(l.priceMonth || 0)}</td>
+                    <td>${l.owner ? l.owner.name : '-'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-small btn-view" onclick="viewListing('${l.id}')">ดู</button>
+                            <button class="btn-small btn-edit" onclick="editListing('${l.id}')">แก้ไข</button>
+                            <button class="btn-small btn-delete" onclick="deleteListing('${l.id}')">ลบ</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('')
+        }
+
+        function renderBookingsTable(bookingsToShow) {
+            const tbody = document.getElementById('bookings-tbody')
+            if(bookingsToShow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีการจอง</div></div></td></tr>'
+                return
+            }
+            
+            tbody.innerHTML = bookingsToShow.map(b => {
+                const listing = listings.find(l => l.id === b.listingId) || {title: 'ไม่ทราบ'}
+                return `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td>${listing.title}</td>
+                        <td>${b.name}</td>
+                        <td>${b.email}</td>
+                        <td>${b.duration} ${b.period === 'month' ? 'เดือน' : 'ปี'}</td>
+                        <td>${formatPrice(b.total || 0)}</td>
+                        <td>${new Date(b.createdAt).toLocaleDateString('th-TH')}</td>
+                        <td><button class="btn-small btn chat-btn" onclick="openChatModalDashboard('${b.listingId}','${b.name}')">💬 แชท</button></td>
+                    </tr>
+                `
+            }).join('')
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-tbody');
+            if(users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีผู้ใช้</div></div></td></tr>';
+                return;
+            }
+            const roleIcons = {
+                customer: '👤',
+                owner: '🏠',
+                admin: '⚙️'
+            };
+            const roleNames = {
+                customer: 'ลูกค้า',
+                owner: 'ผู้ปล่อยเช่า',
+                admin: 'Admin'
+            };
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email}</td>
+                    <td>
+                        <span style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;padding:4px 12px;border-radius:12px;font-size:13px">
+                            ${roleIcons[u.role] || '👤'} ${roleNames[u.role] || u.role}
+                        </span>
+                    </td>
+                    <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('th-TH') : '-'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-small btn-edit" onclick="openEditUserModal('${u.username}')">✏️ แก้ไข</button>
+                            <button class="btn-small btn-edit" onclick="changeRole('${u.username}', '${u.role}')">🔄 เปลี่ยนบทบาท</button>
+                            <button class="btn-small btn-delete" onclick="deleteUser('${u.username}')">🗑️ ลบ</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatPrice(n){
+            return new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:0}).format(n)
+        }
+
+        function viewListing(id) {
+            window.location.href = `index.html#listing-${id}`
+        }
+
+        function editListing(id) {
+            alert('ฟังก์ชันแก้ไขยังไม่เปิดใช้งาน')
+        }
+
+        function deleteListing(id) {
+            if(confirm('แน่ใจหรือไม่ว่าต้องการลบที่พักนี้?')) {
+                alert('ฟังก์ชันลบยังไม่เปิดใช้งาน')
+            }
+        }
+
+        // Add Listing Modal Functions
+        function openAddListingModal() {
+            document.getElementById('addListingModal').style.display = 'flex'
+            // Reset form
+            document.getElementById('addListingForm').reset()
+        }
+
+        function closeAddListingModal() {
+            document.getElementById('addListingModal').style.display = 'none'
+        }
+
+        function submitAddListing() {
+            const form = document.getElementById('addListingForm')
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                alert('❌ กรุณากรอกข้อมูลให้ครบถ้วน')
+                form.reportValidity()
+                return
+            }
+
+            // Get amenities
+            const amenities = Array.from(document.querySelectorAll('.listing-amenity:checked'))
+                .map(cb => cb.value)
+
+            // Create new listing object
+            const newListing = {
+                id: Date.now(),
+                name: document.getElementById('listingName').value.trim(),
+                type: document.getElementById('listingType').value,
+                location: document.getElementById('listingLocation').value.trim(),
+                price: parseInt(document.getElementById('listingPrice').value),
+                image: document.getElementById('listingImage').value.trim(),
+                description: document.getElementById('listingDescription').value.trim(),
+                bedrooms: parseInt(document.getElementById('listingBedrooms').value),
+                bathrooms: parseInt(document.getElementById('listingBathrooms').value),
+                size: parseFloat(document.getElementById('listingSize').value),
+                coordinates: {
+                    lat: parseFloat(document.getElementById('listingLat').value),
+                    lng: parseFloat(document.getElementById('listingLng').value)
+                },
+                amenities: amenities,
+                owner: {
+                    username: user.username,
+                    name: document.getElementById('ownerName').value.trim(),
+                    phone: document.getElementById('ownerPhone').value.trim(),
+                    line: document.getElementById('ownerLine').value.trim() || ''
+                },
+                createdAt: new Date().toISOString(),
+                available: true
+            }
+
+            // Save to localStorage
+            const currentListings = JSON.parse(localStorage.getItem('unai_listings') || '[]')
+            currentListings.push(newListing)
+            localStorage.setItem('unai_listings', JSON.stringify(currentListings))
+
+            alert('✅ เพิ่มประกาศเรียบร้อยแล้ว!')
+            closeAddListingModal()
+            location.reload()
+        }
+
+        function deleteUser(username) {
+            if(confirm(`แน่ใจหรือไม่ว่าต้องการลบผู้ใช้ ${username}?`)) {
+                const users = auth.getUsers()
+                const updated = users.filter(u => u.username !== username)
+                auth.saveUsers(updated)
+                alert(`ลบผู้ใช้ ${username} เรียบร้อยแล้ว`)
+                location.reload()
+            }
+        }
+
+        function changeRole(username, currentRole) {
+            // Open modal
+            const modal = document.getElementById('roleModal')
+            const roleNames = {
+                customer: '👤 ลูกค้า (Customer)',
+                owner: '🏠 ผู้ปล่อยเช่า (Owner)',
+                admin: '⚙️ Admin (ผู้ดูแลระบบ)'
+            }
+            
+            document.getElementById('modalUsername').value = username
+            document.getElementById('modalCurrentRole').value = roleNames[currentRole] || currentRole
+            document.getElementById('modalNewRole').value = ''
+            
+            modal.classList.add('show')
+        }
+
+        function closeRoleModal() {
+            const modal = document.getElementById('roleModal')
+            modal.classList.remove('show')
+        }
+
+        function submitRoleChange() {
+            const username = document.getElementById('modalUsername').value
+            const currentRoleText = document.getElementById('modalCurrentRole').value
+            const newRole = document.getElementById('modalNewRole').value
+            
+            if (!newRole) {
+                alert('❌ กรุณาเลือกบทบาทใหม่')
+                return
+            }
+            
+            // Get current role value from roleNames reverse lookup
+            const roleValues = {
+                '👤 ลูกค้า (Customer)': 'customer',
+                '🏠 ผู้ปล่อยเช่า (Owner)': 'owner',
+                '⚙️ Admin (ผู้ดูแลระบบ)': 'admin'
+            }
+            const currentRole = roleValues[currentRoleText]
+            
+            if (newRole === currentRole) {
+                alert('ℹ️ บทบาทเดิมกับใหม่เหมือนกัน')
+                return
+            }
+            
+            const result = auth.changeUserRole(username, newRole)
+            
+            if (result.success) {
+                alert(`✅ ${result.message}`)
+                closeRoleModal()
+                location.reload()
+            } else {
+                alert(`❌ ${result.message}`)
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const roleModal = document.getElementById('roleModal')
+            const editUserModal = document.getElementById('editUserModal')
+            const addListingModal = document.getElementById('addListingModal')
+            
+            if (event.target === roleModal) {
+                closeRoleModal()
+            }
+            if (event.target === editUserModal) {
+                closeEditUserModal()
+            }
+            if (event.target === addListingModal) {
+                closeAddListingModal()
+            }
+        }
+
+        // Edit User Modal Functions
+        function openEditUserModal(username) {
+            const users = auth.getUsers()
+            const targetUser = users.find(u => u.username === username)
+            if (!targetUser) {
+                alert('❌ ไม่พบผู้ใช้')
+                return
+            }
+            
+            document.getElementById('editModalUsername').value = targetUser.username
+            document.getElementById('editModalEmail').value = targetUser.email || ''
+            document.getElementById('editModalRole').value = targetUser.role || 'customer'
+            document.getElementById('editModalPassword').value = ''
+            document.getElementById('editModalConfirmPassword').value = ''
+            
+            document.getElementById('editUserModal').style.display = 'flex'
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none'
+        }
+
+        function submitEditUser() {
+            const username = document.getElementById('editModalUsername').value
+            const email = document.getElementById('editModalEmail').value.trim()
+            const role = document.getElementById('editModalRole').value
+            const password = document.getElementById('editModalPassword').value
+            const confirmPassword = document.getElementById('editModalConfirmPassword').value
+            
+            // Validate email
+            if (!email) {
+                alert('❌ กรุณากรอกอีเมล')
+                return
+            }
+            
+            // Validate password match if provided
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    alert('❌ รหัสผ่านไม่ตรงกัน')
+                    return
+                }
+                if (password.length < 4) {
+                    alert('❌ รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร')
+                    return
+                }
+            }
+            
+            // Call admin edit function
+            const updates = { email, role }
+            if (password) {
+                updates.password = password
+            }
+            
+            const result = auth.adminEditUser(username, updates)
+            
+            if (result.success) {
+                alert(`✅ ${result.message}`)
+                closeEditUserModal()
+                location.reload()
+            } else {
+                alert(`❌ ${result.message}`)
+            }
+        }
+
+        // Owner Requests Table
+        function renderOwnerRequestsTable() {
+            const reqs = auth.getOwnerRequests()
+            const tbody = document.getElementById('owner-requests-tbody')
+            if(reqs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีคำขอ</div></div></td></tr>'
+                return
+            }
+            tbody.innerHTML = reqs.map(r => `
+                <tr>
+                    <td><strong>${r.username}</strong></td>
+                    <td>${r.email || '-'}</td>
+                    <td>${new Date(r.requestedAt).toLocaleString('th-TH')}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-small btn-edit" onclick="approveOwnerRequest('${r.username}')">✅ อนุมัติ</button>
+                            <button class="btn-small btn-delete" onclick="rejectOwnerRequest('${r.username}')">❌ ปฏิเสธ</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('')
+        }
+
+        function approveOwnerRequest(username) {
+            if(!confirm(`แน่ใจหรือไม่ว่าต้องการอนุมัติ ${username} เป็นผู้ปล่อยเช่า?`)) return
+            const result = auth.approveOwnerRequest(username)
+            alert(result.message)
+            if(result.success) {
+                renderOwnerRequestsTable()
+                renderUsersTable()
+            }
+        }
+
+        function rejectOwnerRequest(username) {
+            if(!confirm(`แน่ใจหรือไม่ว่าต้องการปฏิเสธคำขอของ ${username}?`)) return
+            const result = auth.rejectOwnerRequest(username)
+            alert(result.message)
+            if(result.success) {
+                renderOwnerRequestsTable()
+            }
+        }
+
+        // --- Chat System for Dashboard ---
+let currentChatListingIdDashboard = null;
+let currentChatCustomerDashboard = null;
+function openChatModalDashboard(listingId, customerName) {
+    currentChatListingIdDashboard = listingId;
+    currentChatCustomerDashboard = customerName;
+    document.getElementById('chat-modal-dashboard').setAttribute('aria-hidden', 'false');
+    renderChatDashboard();
+}
+function closeChatModalDashboard() {
+    document.getElementById('chat-modal-dashboard').setAttribute('aria-hidden', 'true');
+    document.getElementById('chat-input-dashboard').value = '';
+    currentChatListingIdDashboard = null;
+    currentChatCustomerDashboard = null;
+}
+function getCurrentUserDashboard() {
+    return auth.getLoggedInUser();
+}
+function getListingOwnerDashboard(listingId) {
+    const all = JSON.parse(localStorage.getItem('unai_listings') || '[]');
+    return all.find(x => String(x.id) === String(listingId))?.owner || null;
+}
+function getChatKeyDashboard(listingId, customerName, user) {
+    // Key: unai_chat_{listingId}_{customerUsername}_{ownerUsername}
+    const owner = getListingOwnerDashboard(listingId);
+    if (!user || !owner) return null;
+    return `unai_chat_${listingId}_${customerName}_${owner.username}`;
+}
+function renderChatDashboard() {
+    const user = getCurrentUserDashboard();
+    const owner = getListingOwnerDashboard(currentChatListingIdDashboard);
+    if (!user || !owner) {
+        document.getElementById('chat-messages-dashboard').innerHTML = '<div style="color:#dc2626">ไม่พบข้อมูลผู้ใช้หรือเจ้าของ</div>';
+        return;
+    }
+    const chatKey = getChatKeyDashboard(currentChatListingIdDashboard, currentChatCustomerDashboard, user);
+    const messages = JSON.parse(localStorage.getItem(chatKey) || '[]');
+    const box = document.getElementById('chat-messages-dashboard');
+    box.innerHTML = '';
+    messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.style.margin = '8px 0';
+        div.style.textAlign = msg.sender === user.username ? 'right' : 'left';
+        div.innerHTML = `<span style="display:inline-block;padding:8px 14px;border-radius:16px;max-width:70%;background:${msg.sender === user.username ? '#2563eb' : '#f3f4f6'};color:${msg.sender === user.username ? '#fff' : '#222'};font-size:15px;">${escapeHtml(msg.text)}</span><br><span style="font-size:11px;color:#888;">${msg.sender === user.username ? 'คุณ' : msg.sender} ${formatTimeDashboard(msg.time)}</span>`;
+        box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+}
+function formatTimeDashboard(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chat-form-dashboard');
+    if (chatForm) {
+        chatForm.onsubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input-dashboard');
+            const text = input.value.trim();
+            if (!text) return;
+            const user = getCurrentUserDashboard();
+            const chatKey = getChatKeyDashboard(currentChatListingIdDashboard, currentChatCustomerDashboard, user);
+            if (!chatKey) return;
+            const messages = JSON.parse(localStorage.getItem(chatKey) || '[]');
+            messages.push({ sender: user.username, text, time: new Date().toISOString() });
+            localStorage.setItem(chatKey, JSON.stringify(messages));
+            input.value = '';
+            renderChatDashboard();
+        };
+    }
+});
+
+
+function openProfileModal() {
+    const user = auth.getLoggedInUser();
+    if (!user) {
+        alert('กรุณาเข้าสู่ระบบก่อน');
+        return;
+    }
+    // Use Thai/English role label for consistency
+    const roleNames = {
+        customer: '👤 ลูกค้า (Customer)',
+        owner: '🏠 ผู้ปล่อยเช่า (Owner)',
+        admin: '⚙️ Admin (ผู้ดูแลระบบ)'
+    };
+    document.getElementById('profile-username').value = user.username;
+    document.getElementById('profile-email').value = user.email;
+    document.getElementById('profile-role').value = roleNames[user.role] || user.role;
+    document.getElementById('profile-created').value = user.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH') : '-';
+    document.getElementById('profileModal').style.display = 'flex';
+}
+
+function closeProfileModal() {
+    document.getElementById('profileModal').style.display = 'none';
+}
+
+function showEditProfile() {
+    document.getElementById('profile-view-mode').style.display = 'none';
+    document.getElementById('profile-edit-mode').style.display = 'block';
+    const user = auth.getLoggedInUser();
+    document.getElementById('edit-profile-username').value = user.username;
+    document.getElementById('edit-profile-email').value = user.email;
+}
+
+function cancelEditProfile() {
+    document.getElementById('profile-edit-mode').style.display = 'none';
+    document.getElementById('profile-view-mode').style.display = 'block';
+}
+
+document.getElementById('cancel-edit-profile-btn').onclick = cancelEditProfile;
+
+document.getElementById('profile-edit-form').onsubmit = function(e) {
+    e.preventDefault();
+    const email = document.getElementById('edit-profile-email').value.trim();
+    const password = document.getElementById('edit-profile-password').value;
+    const confirmPassword = document.getElementById('edit-profile-confirm-password').value;
+
+    if (password && password !== confirmPassword) {
+        alert('รหัสผ่านไม่ตรงกัน');
+        return;
+    }
+
+    const updates = { email };
+    if (password) updates.password = password;
+
+    const result = auth.updateProfile(updates);
+    if (result.success) {
+        alert('บันทึกข้อมูลสำเร็จ');
+        closeProfileModal();
+        location.reload();
+    } else {
+        alert('เกิดข้อผิดพลาด: ' + result.message);
+    }
+};
+    </script>
+</body>
+</html>
