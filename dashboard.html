@@ -323,12 +323,14 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>รูปปก</th>
                             <th>ที่พัก</th>
                             <th>ผู้จอง</th>
                             <th>อีเมล</th>
                             <th>ระยะเวลา</th>
                             <th>ราคารวม</th>
                             <th>วันที่จอง</th>
+                            <th>การจัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="bookings-tbody">
@@ -503,9 +505,23 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>🖼️ URL รูปภาพ *</label>
-                        <input type="url" id="listingImage" required placeholder="https://example.com/image.jpg" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
-                        <small style="color:#6b7280;font-size:12px">* ใส่ลิงก์รูปภาพจากอินเทอร์เน็ต</small>
+                        <label>� รูปปก *</label>
+                        <input type="file" id="listingCoverFile" accept="image/*" style="width:100%;padding:10px;border:2px solid #3b82f6;border-radius:8px;background:#fff" />
+                        <small style="color:#6b7280;font-size:12px;display:block;margin-top:6px">รองรับไฟล์ภาพ (แนะนำ &lt; 2MB). หรือใส่ลิงก์รูปปกด้านล่าง</small>
+                        <input type="url" id="listingCoverUrl" placeholder="ลิงก์รูปปก เช่น https://example.com/cover.jpg" style="margin-top:8px;width:100%;padding:12px 15px;border:2px solid #e5e7eb;border-radius:8px">
+                        <div id="listingCoverPreview" style="margin-top:10px;display:none">
+                            <img id="listingCoverPreviewImg" src="" alt="ตัวอย่างรูปปก" style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;object-fit:cover;max-height:220px" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🖼️ รูปภาพเพิ่มเติม</label>
+                        <input type="file" id="listingImageFile" accept="image/*" style="width:100%;padding:10px;border:2px solid #3b82f6;border-radius:8px;background:#fff" />
+                        <small style="color:#6b7280;font-size:12px;display:block;margin-top:6px">รองรับไฟล์ภาพ (แนะนำ &lt; 2MB). หรือลิงก์ภาพเพิ่มเติมด้านล่าง (ไม่บังคับ)</small>
+                        <input type="url" id="listingImageUrl" placeholder="ลิงก์รูปภาพเพิ่มเติม เช่น https://example.com/image.jpg" style="margin-top:8px;width:100%;padding:12px 15px;border:2px solid #e5e7eb;border-radius:8px">
+                        <div id="listingImagePreview" style="margin-top:10px;display:none">
+                            <img id="listingImagePreviewImg" src="" alt="ตัวอย่างรูปภาพ" style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;object-fit:cover;max-height:220px" />
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -564,6 +580,14 @@
                             <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
                                 <input type="checkbox" class="listing-amenity" value="รปภ. 24 ชม."> รปภ. 24 ชม.
                             </label>
+                            <!-- อื่นๆ -->
+                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                <input type="checkbox" id="amenityOther"> อื่นๆ
+                            </label>
+                            <div id="amenities-other-wrapper" style="display:none;margin-top:10px;grid-column:1 / -1">
+                                <input type="text" id="listingAmenitiesOther" placeholder="พิมพ์รายการคั่นด้วยเครื่องหมายจุลภาค เช่น เครื่องซักผ้า, เลี้ยงสัตว์ได้" style="width:100%;padding:10px 12px;border:1.5px solid #3b82f6;border-radius:8px;background:#fff;color:#1f2937">
+                                <small style="color:#6b7280;display:block;margin-top:6px">เคล็ดลับ: คั่นแต่ละรายการด้วยเครื่องหมายจุลภาค (,)</small>
+                            </div>
                         </div>
                     </div>
                     
@@ -578,8 +602,18 @@
                             <input type="tel" id="ownerPhone" required placeholder="0812345678" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
                         </div>
                         <div class="form-group">
-                            <label>💬 LINE ID</label>
+                            <label><i class="fab fa-line"></i> LINE ID</label>
                             <input type="text" id="ownerLine" placeholder="@yourline" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                            <small style="color:#6b7280;font-size:12px">* ไม่บังคับ</small>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-facebook"></i> Facebook</label>
+                            <input type="text" id="ownerFacebook" placeholder="ลิงก์หรือชื่อ Facebook" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
+                            <small style="color:#6b7280;font-size:12px">* ไม่บังคับ</small>
+                        </div>
+                        <div class="form-group">
+                            <label>📝 ช่องทางอื่นๆ</label>
+                            <input type="text" id="ownerOtherContact" placeholder="เช่น Email, IG, Website" style="width:100%;padding:12px 15px;border:2px solid #3b82f6;border-radius:8px">
                             <small style="color:#6b7280;font-size:12px">* ไม่บังคับ</small>
                         </div>
                     </div>
@@ -591,7 +625,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Chat Modal for Dashboard -->
     <div id="chat-modal-dashboard" class="modal" aria-hidden="true" style="z-index:9999;">
         <div class="modal-content" style="max-width:420px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;">
@@ -693,15 +727,17 @@
         }
 
         // Display role
-        const roleNames = {
-            admin: '<i class="fas fa-cog"></i> admin (Admin)',
-            owner: '<i class="fas fa-home"></i> owner (Owner)',
-            customer: '<i class="fas fa-user"></i> customer (Customer)'
-        }
         const roleBadgeNav = document.getElementById('role-badge-nav')
         if(roleBadgeNav) {
+            const displayName = user.displayName || user.name || user.username || ''
+            const roleLabels = {
+                admin: '<i class="fas fa-cog"></i> admin (Admin)',
+                owner: `🏠 ${displayName || 'ผู้ปล่อยเช่า'} (ผู้ปล่อยเช่า)`,
+                customer: '<i class="fas fa-user"></i> customer (Customer)'
+            }
+
             // Set label and content
-            roleBadgeNav.innerHTML = roleNames[user.role] || user.role
+            roleBadgeNav.innerHTML = roleLabels[user.role] || user.role
             // Make it behave like a button
             roleBadgeNav.setAttribute('role', 'button')
             roleBadgeNav.setAttribute('tabindex', '0')
@@ -896,16 +932,22 @@
         function renderBookingsTable(bookingsToShow) {
             const tbody = document.getElementById('bookings-tbody')
             if(bookingsToShow.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีการจอง</div></div></td></tr>'
+                tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="icon">📭</div><div>ยังไม่มีการจอง</div></div></td></tr>'
                 return
             }
             
             tbody.innerHTML = bookingsToShow.map(b => {
-                const listing = listings.find(l => l.id === b.listingId) || {title: 'ไม่ทราบ'}
+                const listing = listings.find(l => l.id === b.listingId) || {}
+                const title = listing.title || listing.name || b.listingName || 'ไม่ทราบ'
+                const coverImage = b.coverImage || listing.coverImage || listing.image || ''
+                const coverHtml = coverImage
+                    ? `<img src="${coverImage}" alt="${escapeHtml(title)}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb">`
+                    : '<span style="color:#9ca3af">ไม่มีรูป</span>'
                 return `
                     <tr>
                         <td>${b.id}</td>
-                        <td>${listing.title}</td>
+                        <td>${coverHtml}</td>
+                        <td>${escapeHtml(title)}</td>
                         <td>${b.name}</td>
                         <td>${b.email}</td>
                         <td>${b.duration} ${b.period === 'month' ? 'เดือน' : 'ปี'}</td>
@@ -977,13 +1019,34 @@
             document.getElementById('addListingModal').style.display = 'flex'
             // Reset form
             document.getElementById('addListingForm').reset()
+            // Reset image inputs and preview
+            const coverFileEl = document.getElementById('listingCoverFile')
+            const coverUrlEl = document.getElementById('listingCoverUrl')
+            const coverPrev = document.getElementById('listingCoverPreview')
+            const coverPrevImg = document.getElementById('listingCoverPreviewImg')
+            const fileEl = document.getElementById('listingImageFile')
+            const urlEl = document.getElementById('listingImageUrl')
+            const prev = document.getElementById('listingImagePreview')
+            const prevImg = document.getElementById('listingImagePreviewImg')
+            const otherCb = document.getElementById('amenityOther')
+            const otherWrapper = document.getElementById('amenities-other-wrapper')
+            const otherInput = document.getElementById('listingAmenitiesOther')
+            if (coverFileEl) coverFileEl.value = ''
+            if (coverUrlEl) coverUrlEl.value = ''
+            if (coverPrev && coverPrevImg) { coverPrev.style.display = 'none'; coverPrevImg.src = '' }
+            if (fileEl) fileEl.value = ''
+            if (urlEl) urlEl.value = ''
+            if (prev && prevImg) { prev.style.display = 'none'; prevImg.src = '' }
+            if (otherCb) otherCb.checked = false
+            if (otherWrapper) otherWrapper.style.display = 'none'
+            if (otherInput) otherInput.value = ''
         }
 
         function closeAddListingModal() {
             document.getElementById('addListingModal').style.display = 'none'
         }
 
-        function submitAddListing() {
+        async function submitAddListing() {
             const form = document.getElementById('addListingForm')
             
             // Validate form
@@ -994,8 +1057,73 @@
             }
 
             // Get amenities
-            const amenities = Array.from(document.querySelectorAll('.listing-amenity:checked'))
+            let amenities = Array.from(document.querySelectorAll('.listing-amenity:checked'))
                 .map(cb => cb.value)
+
+            // Include custom amenities from 'Other' input if enabled
+            const otherCb = document.getElementById('amenityOther')
+            const otherInput = document.getElementById('listingAmenitiesOther')
+            if (otherCb && otherCb.checked && otherInput) {
+                const extra = otherInput.value
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean)
+                amenities.push(...extra)
+            }
+
+            // De-duplicate
+            amenities = Array.from(new Set(amenities))
+
+            // Resolve image from file or URL
+            function readFileAsDataURL(file){
+                return new Promise((resolve,reject)=>{
+                    const reader = new FileReader()
+                    reader.onload = ()=> resolve(reader.result)
+                    reader.onerror = reject
+                    reader.readAsDataURL(file)
+                })
+            }
+
+            const coverFileInput = document.getElementById('listingCoverFile')
+            const coverUrlInput = document.getElementById('listingCoverUrl')
+            const coverFile = coverFileInput && coverFileInput.files ? coverFileInput.files[0] : null
+            let coverImageData = ''
+            if (coverFile) {
+                if (coverFile.size > 2 * 1024 * 1024) {
+                    alert('ไฟล์รูปปกใหญ่เกินไป (จำกัด 2MB)')
+                    return
+                }
+                try {
+                    coverImageData = await readFileAsDataURL(coverFile)
+                } catch (e) {
+                    alert('ไม่สามารถอ่านไฟล์รูปปกได้')
+                    return
+                }
+            } else if (coverUrlInput && coverUrlInput.value.trim()) {
+                coverImageData = coverUrlInput.value.trim()
+            } else {
+                alert('กรุณาเลือกรูปปกจากไฟล์ หรือใส่ลิงก์รูปปก')
+                return
+            }
+
+            const fileInput = document.getElementById('listingImageFile')
+            const urlInput = document.getElementById('listingImageUrl')
+            const file = fileInput && fileInput.files ? fileInput.files[0] : null
+            let imageData = ''
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                    alert('ไฟล์รูปภาพเพิ่มเติมใหญ่เกินไป (จำกัด 2MB)')
+                    return
+                }
+                try {
+                    imageData = await readFileAsDataURL(file)
+                } catch (e) {
+                    alert('ไม่สามารถอ่านไฟล์รูปภาพเพิ่มเติมได้')
+                    return
+                }
+            } else if (urlInput && urlInput.value.trim()) {
+                imageData = urlInput.value.trim()
+            }
 
             // Create new listing object
             const newListing = {
@@ -1004,7 +1132,8 @@
                 type: document.getElementById('listingType').value,
                 location: document.getElementById('listingLocation').value.trim(),
                 price: parseInt(document.getElementById('listingPrice').value),
-                image: document.getElementById('listingImage').value.trim(),
+                coverImage: coverImageData,
+                image: imageData || coverImageData,
                 description: document.getElementById('listingDescription').value.trim(),
                 bedrooms: parseInt(document.getElementById('listingBedrooms').value),
                 bathrooms: parseInt(document.getElementById('listingBathrooms').value),
@@ -1018,7 +1147,9 @@
                     username: user.username,
                     name: document.getElementById('ownerName').value.trim(),
                     phone: document.getElementById('ownerPhone').value.trim(),
-                    line: document.getElementById('ownerLine').value.trim() || ''
+                    line: document.getElementById('ownerLine').value.trim() || '',
+                    facebook: document.getElementById('ownerFacebook').value.trim() || '',
+                    other: document.getElementById('ownerOtherContact').value.trim() || ''
                 },
                 createdAt: new Date().toISOString(),
                 available: true
@@ -1356,6 +1487,86 @@ document.getElementById('profile-edit-form').onsubmit = function(e) {
         alert('เกิดข้อผิดพลาด: ' + result.message);
     }
 };
+    </script>
+    <script>
+    // Live preview for image input
+    document.addEventListener('DOMContentLoaded', function(){
+        const coverFileEl = document.getElementById('listingCoverFile')
+        const coverUrlEl = document.getElementById('listingCoverUrl')
+        const coverPrev = document.getElementById('listingCoverPreview')
+        const coverPrevImg = document.getElementById('listingCoverPreviewImg')
+        const fileEl = document.getElementById('listingImageFile')
+        const urlEl = document.getElementById('listingImageUrl')
+    const prev = document.getElementById('listingImagePreview')
+    const prevImg = document.getElementById('listingImagePreviewImg')
+    const amenityOtherCheckbox = document.getElementById('amenityOther')
+    const amenityOtherWrapper = document.getElementById('amenities-other-wrapper')
+    const amenityOtherInput = document.getElementById('listingAmenitiesOther')
+        function showCover(src){
+            if (coverPrev && coverPrevImg) {
+                coverPrevImg.src = src
+                coverPrev.style.display = src ? 'block' : 'none'
+            }
+        }
+        function show(src){
+            if (prev && prevImg) {
+                prevImg.src = src
+                prev.style.display = src ? 'block' : 'none'
+            }
+        }
+        function toggleOtherAmenities(){
+            if(!amenityOtherWrapper) return
+            if(amenityOtherCheckbox && amenityOtherCheckbox.checked){
+                amenityOtherWrapper.style.display = 'block'
+                if(amenityOtherInput){
+                    amenityOtherInput.focus()
+                }
+            } else {
+                amenityOtherWrapper.style.display = 'none'
+                if(amenityOtherInput){
+                    amenityOtherInput.value = ''
+                }
+            }
+        }
+        if (coverFileEl) {
+            coverFileEl.addEventListener('change', () => {
+                const f = coverFileEl.files && coverFileEl.files[0]
+                if (!f) { showCover(''); return }
+                const reader = new FileReader()
+                reader.onload = ()=> showCover(reader.result)
+                reader.onerror = ()=> showCover('')
+                reader.readAsDataURL(f)
+            })
+        }
+        if (coverUrlEl) {
+            coverUrlEl.addEventListener('input', () => {
+                const val = coverUrlEl.value.trim()
+                if (!val) { showCover(''); return }
+                showCover(val)
+            })
+        }
+        if (fileEl) {
+            fileEl.addEventListener('change', () => {
+                const f = fileEl.files && fileEl.files[0]
+                if (!f) { show(''); return }
+                const reader = new FileReader()
+                reader.onload = ()=> show(reader.result)
+                reader.onerror = ()=> show('')
+                reader.readAsDataURL(f)
+            })
+        }
+        if (urlEl) {
+            urlEl.addEventListener('input', () => {
+                const val = urlEl.value.trim()
+                if (!val) { show(''); return }
+                show(val)
+            })
+        }
+        if(amenityOtherCheckbox){
+            amenityOtherCheckbox.addEventListener('change', toggleOtherAmenities)
+            toggleOtherAmenities()
+        }
+    })
     </script>
 </body>
 </html>

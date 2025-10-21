@@ -211,6 +211,7 @@ async function initializeListings() {
                 location: item.location,
                 price: item.priceMonth,
                 image: item.image,
+                coverImage: item.coverImage || item.image,
                 description: item.description,
                 bedrooms: item.maxGuests >= 4 ? 2 : 1,
                 bathrooms: 1,
@@ -224,7 +225,9 @@ async function initializeListings() {
                     username: 'demo',
                     name: item.owner.name,
                     phone: item.owner.phone,
-                    line: item.owner.line || ''
+                    line: item.owner.line || '',
+                    facebook: item.owner.facebook || '',
+                    other: item.owner.other || ''
                 },
                 createdAt: new Date().toISOString(),
                 available: true
@@ -277,12 +280,13 @@ function renderListings(items){
         const title = it.name || it.title
         const price = it.price || it.priceMonth || 0
         const maxGuests = it.bedrooms ? it.bedrooms * 2 : (it.maxGuests || 2)
+        const cover = it.coverImage || it.image || 'https://via.placeholder.com/400x250?text=No+Image'
         
         const priceMonth = formatPrice(price) + ' / เดือน'
         const amenitiesText = it.amenities ? it.amenities.join(' • ') : ''
         
         card.innerHTML = `
-            <img src="${it.image}" alt="${title}">
+            <img src="${cover}" alt="${escapeHtml(title)}">
             <div class="card-body">
                 <h3>${title}</h3>
                 <p>${it.location} • ประเภท: ${it.type} • ${it.bedrooms || 1} ห้องนอน ${it.bathrooms || 1} ห้องน้ำ</p>
@@ -312,13 +316,14 @@ function renderListings(items){
             const lng = it.coordinates?.lng || it.lon
             const title = it.name || it.title
             const price = it.price || it.priceMonth || 0
+            const coverImg = it.coverImage || it.image || 'https://via.placeholder.com/400x250?text=No+Image'
             
             if(lat && lng){
                 const marker = L.marker([lat, lng]).addTo(map)
                 const priceMonth = formatPrice(price) + ' / เดือน'
                 const popupHtml = `
                     <div style="min-width:220px; max-width:280px;">
-                        <img src="${it.image}" alt="${escapeHtml(title)}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
+                        <img src="${coverImg}" alt="${escapeHtml(title)}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
                         <strong style="font-size:15px;">${escapeHtml(title)}</strong>
                         <div style="color:#666; font-size:13px; margin-top:4px;">${escapeHtml(it.location)} • ${escapeHtml(it.type)}</div>
                         <div style="color:#059669; font-weight:600; margin-top:6px;">${priceMonth}</div>
@@ -362,6 +367,8 @@ function openBooking(e){
                     <div>👤 ${escapeHtml(item.owner.name)}</div>
                     <div>📱 <a href="tel:${item.owner.phone}">${item.owner.phone}</a></div>
                     ${item.owner.line ? `<div>💬 LINE: <a href="https://line.me/R/ti/p/${item.owner.line}" target="_blank">${item.owner.line}</a></div>` : ''}
+                        ${item.owner.facebook ? `<div>📘 Facebook: ${renderContactValue(item.owner.facebook)}</div>` : ''}
+                        ${item.owner.other ? `<div>📝 ช่องทางอื่นๆ: ${escapeHtml(item.owner.other)}</div>` : ''}
                 </div>
             </div>
         `
@@ -403,6 +410,8 @@ function contactOwner(id){
     message += `👤 ชื่อ: ${owner.name}\n`
     message += `📱 โทร: ${owner.phone}\n`
     if(owner.line) message += `💬 LINE: ${owner.line}\n`
+    if(owner.facebook) message += `📘 Facebook: ${owner.facebook}\n`
+    if(owner.other) message += `📝 ช่องทางอื่นๆ: ${owner.other}\n`
     message += `\nคุณต้องการติดต่อช่องทางไหน?`
     
     if(confirm(message)){
@@ -508,6 +517,7 @@ function init(){
             id: `b_${Date.now()}`,
             listingId: e.target.dataset.id,
             listingName: item ? (item.name || item.title) : 'N/A',
+            coverImage: item ? (item.coverImage || item.image || '') : '',
             name: fd.get('name'),
             email: fd.get('email'),
             period: fd.get('period'),
@@ -567,14 +577,19 @@ async function initLeafletMap(){
     // add markers with enhanced popups
     markers = []
     listings.forEach(it=>{
-        if(it.lat && it.lon){
-            const marker = L.marker([it.lat, it.lon]).addTo(map)
-            const priceMonth = it.priceMonth ? formatPrice(it.priceMonth) + ' / เดือน' : ''
+        const lat = it.coordinates?.lat || it.lat
+        const lng = it.coordinates?.lng || it.lon
+        if(lat && lng){
+            const marker = L.marker([lat, lng]).addTo(map)
+            const priceValue = it.price || it.priceMonth || 0
+            const priceMonth = priceValue ? formatPrice(priceValue) + ' / เดือน' : ''
             const priceYear = it.priceYear ? formatPrice(it.priceYear) + ' / ปี' : ''
+            const coverImg = it.coverImage || it.image || 'https://via.placeholder.com/400x250?text=No+Image'
+            const title = it.name || it.title
             const popupHtml = `
                 <div style="min-width:220px; max-width:280px;">
-                    <img src="${it.image}" alt="${escapeHtml(it.title)}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
-                    <strong style="font-size:15px;">${escapeHtml(it.title)}</strong>
+                    <img src="${coverImg}" alt="${escapeHtml(title)}" style="width:100%; height:120px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
+                    <strong style="font-size:15px;">${escapeHtml(title)}</strong>
                     <div style="color:#666; font-size:13px; margin-top:4px;">${escapeHtml(it.location)} • ${escapeHtml(it.type)}</div>
                     <div style="color:#059669; font-weight:600; margin-top:6px;">${priceMonth}${priceYear ? '<br>' + priceYear : ''}</div>
                     <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
@@ -689,6 +704,31 @@ function escapeHtml(s){
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"
     }[ch]))
 }
+    function renderContactValue(raw){
+        if(!raw) return ''
+        const value = String(raw).trim()
+        if(!value) return ''
+
+        const isUrl = /^https?:\/\//i.test(value)
+        const startsWithWww = /^www\./i.test(value)
+        const containsFacebook = /facebook\.com/i.test(value)
+
+        let href = value
+        if(!isUrl){
+            if(startsWithWww){
+                href = `https://${value}`
+            } else if(containsFacebook){
+                href = `https://${value}`
+            } else {
+                const normalized = value.replace(/^@/, '')
+                href = `https://www.facebook.com/${normalized}`
+            }
+        }
+
+        const safeHref = escapeHtml(href)
+        const safeLabel = escapeHtml(value)
+        return `<a href="${safeHref}" target="_blank" rel="noopener">${safeLabel}</a>`
+    }
 
 // Profile Modal logic
 function openProfileModal() {
